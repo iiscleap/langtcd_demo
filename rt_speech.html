@@ -1,0 +1,458 @@
+<!DOCTYPE html> 
+<html> 
+<head>
+    <meta charset="utf-8">
+    <title>Listen for Change</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="./img/favicon.ico" rel="icon">
+  
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,500,700|Roboto:400,900" rel="stylesheet">
+    
+    <!-- Bootstrap CSS File -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+  
+    <!--
+     Libraries CSS Files 
+    <link href="Bell/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    -->
+    
+    <!--     Main Stylesheet File -->
+    <link href="./css/style.css" rel="stylesheet">
+    
+    <!--     Button Shake Stylesheet File -->
+    <link href="./css/csshake.min.css" rel="stylesheet">    
+</head>
+
+<body>
+<div id='experimentDiv' style="display: block;">
+    <div>
+<!--        dummy for vertical padding-->
+        <p></p>
+    </div>
+<div class="container text-center">   
+<div class="card card-block text-center">    
+    <h3><font color="#199EB8">Language Familiarity for Talker Change Detection</font></h3>
+    Step 1: Choose any Language.
+    <font size="2" color="gray">This creates the playlist for the test. There are 110 English samples and 106 Chinese samples. You can change the language anytime during the test.</font><br>
+    Step 2: Press "Play".
+    <font size="2" color="gray">This will play the audio. Be attentive.</font><br>
+    Step 3: Press 1 or 2.
+    <font size="2" color="gray">Press the number of talkers you detected in the audio, as soon as it stops playing. Your response time will be computed.</font><br>
+    Step 4: Press "Next" and go to Step 2..
+    <font size="2" color="gray">This will go to the next audio sample. You can relax when needed.</font><br>
+    <br>
+</div>
+</div>
+<br>
+<br>
+<p></p>
+<p></p>
+<div class="container text-center">    
+<div class="meta">
+<a href="javascript:load_files('c');" style="margin-left:50px;margin-right:50px"><input type="button" id="load_chin" value="Chinese" class="btn btn-full"></a>
+<a href="javascript:load_files('e');" style="margin-left:50px;margin-right:50px"><input type="button" id="load_eng" value="English" class="btn btn-full"></a><br />
+</div>
+<p></p>
+<p></p>
+</div>
+<!-- <div class="container ">    
+<div class="meta">
+<a href="javascript:load_files('e');"><input type="button" id="load_eng" value="English" class="btn btn-full"></a><br />
+</div>
+</div> -->
+
+<div>
+<br>
+<br>
+
+
+</div>
+    
+<div class="container text-center">    
+<div class="divPlay">
+<audio id="audioFile" src="" preload="auto" onended="done_sound('audioFile');"></audio>
+<a href="javascript:play_sound('audioFile');"><input type="button" id="play" value="Play" disabled="true" class="btn btn-full"></a><br />
+</div>
+</div>
+
+    <p></p>
+<!-- <div class="container text-center">    
+<div class="timer">00:00:00</div>
+</div> -->
+
+    
+<div>
+<p></p>
+</div>
+<br>
+<br>
+
+    
+<div class="container text-center">        
+<div class="meta">
+<a href="javascript:hitpressed('1');" style="margin-left:75px;margin-right:75px"><input type="button" id="hitPressed1" value="1" disabled="true" class="btn btn-full"></a>
+<a href="javascript:hitpressed('2');" style="margin-left:75px;margin-right:75px"><input type="button" id="hitPressed2" value="2" disabled="true" class="btn btn-full"></a><br />
+</div>
+</div>
+<p></p>
+<!-- <div class="container text-center">        
+<div class="meta">
+<a href="javascript:hitpressed('2');"><input type="button" id="hitPressed2" value="2" disabled="true" class="btn btn-full"></a><br />
+</div>
+</div> -->
+<p></p>
+<br>
+<br>
+<div class="container text-center">        
+<div class="meta">
+<a href="javascript:next_trial('audioFile');"><input type="button" id="nextTrial" value="Next" disabled class="btn btn-full"></a><br />
+</div>
+</div>
+
+<div class="container text-center">    
+<br>
+<!--
+<form>
+<input type = "button" id="saveData" value = "" 
+onclick = "writeData('fileWriteAudio.php','targetDiv1')" disabled class="btn btn-full">
+</form>
+-->
+</div>
+
+    <div class="shake-chunk">:)</div>
+        <div id = "targetDiv1">
+    <p><br><br>  </p>
+    </div>
+
+</div>
+</body>
+
+<script src = "./data/rtSamples_c/file_list.txt"></script>
+<script src = "./data/rtSamples_e/file_list.txt"></script>
+    
+<script type="text/javascript">   
+    var ntrial;
+    const numLists = 1;
+    var itrial = 0;
+    var curr_lang='c'
+    var theTimer;// = document.querySelector(".timer");
+    var timer = [0,0,0,0]
+    var interval = 0;
+    var timerRunning = false;    
+    
+    var trial = 0, length = 0;
+    var files_set = [];    
+    var value = 1234;
+//    var sTime = '';
+    
+//    var direc_path = './media/audio/rtsamples/';
+    var direc_path = './data/rtSamples_/';
+    var files_set_test, files_set_key, files_set_score;
+    
+    // Add leading zero to numbers 9 or below (purely for aesthetics):
+    function leadingZero(time) {
+        if (time <= 9) {
+            time = "0" + time;
+        }
+        return time;
+    }
+    
+    // To run stop watch timer:
+    function runTimer() {
+        //let currentTime = leadingZero(timer[0]) + ":" + leadingZero(timer[1]) + ":" + leadingZero(timer[2]);
+        //theTimer.innerHTML = currentTime;
+
+        let currentTime = timer[3]*10;
+        // console.log(timer[3]*10);
+        
+        theTimer = timer[3]*10;
+        timer[3]++;
+
+        timer[0] = Math.floor((timer[3]/100)/60);
+        timer[1] = Math.floor((timer[3]/100) - (timer[0] * 60));
+        timer[2] = Math.floor(timer[3] - (timer[1] * 100) - (timer[0] * 6000));
+    }
+    
+    // to read keystroke
+//    document.addEventListener("keydown", keyDownTextField, false);
+//    function keyDownTextField(e) {
+//        var keyCode = e.keyCode;
+//        if(keyCode==77) {
+//            console.log("M stroke");
+//            sTime  = theTimer.innerHTML; 
+//            console.log(sTime);  
+//            rt_time = sTime - parseInt(files_set_key[trial]);
+//            console.log(rt_time);
+//            if (rt_time>200) {
+//            temp_str = "Your reaction time is "+rt_time+ " msec";
+//                alert(temp_str);
+//            }
+//            else {
+//                alert("False Alarm!");
+//            }
+//        }
+//        else {
+//            alert("Oh no you didn't press M");
+//        }
+//    }
+
+    function hitpressed(response) {
+        console.log("M stroke");
+        rt_time  = theTimer
+        // rt_time = sTime - parseInt(files_set_key[trial]);
+        console.log(rt_time);
+        clearInterval(interval);
+        interval = null;
+        timer = [0,0,0,0];
+        timerRunning = false;
+
+        theTimer = 0;   
+        // if (rt_time>200) {
+        file = document.getElementById('audioFile').src
+        grd = file.charAt(file.length-5)
+        console.log("File: "+files_set_test[trial])
+        console.log("Response: "+response); 
+        console.log("Ground Truth: "+grd)
+
+        if(response==grd){
+            output = "Correct!"
+        }
+        else{
+            output = "Wrong!"
+            if(grd=='2'&&response=='1'){
+                output += " Miss!"
+            }
+            else{
+                output += " False Alarm!"
+            }
+        }
+        temp_str = output+"\nYour reaction time is "+rt_time/1000+ " sec";
+            alert(temp_str);
+        // }
+        // else if (rt_time<200) {
+            // alert("False Alarm!");
+        // }
+        document.getElementById("hitPressed1").disabled = true;
+        document.getElementById("hitPressed2").disabled = true;
+        document.getElementById("nextTrial").disabled = false;
+        if(curr_lang=='c'){
+            document.getElementById("load_eng").disabled = false;
+            document.getElementById("load_chin").disabled = true;
+        }
+        else{
+            document.getElementById("load_eng").disabled = true;
+            document.getElementById("load_chin").disabled = false;
+        }
+        trial = trial + 1;
+
+    }
+    
+    // function to load filenames from list in server
+    function load_files(lang){
+        curr_lang=lang
+        direc_path = './data/rtSamples_'+lang+'/'
+        load_inits();
+        load_test_files(lang);
+
+        console.log(files_set_test);
+        console.log(files_set_key);
+
+        //document.getElementById("select1").href = 'javascript:select_choice('+ref_index+');'; // update text in button
+        if(lang=='e'){
+            document.getElementById("load_eng").value = 'English Loaded'; // update text in button
+            document.getElementById("load_eng").disabled = true; // disable load button
+            document.getElementById("load_chin").value = 'Chinese'; // update text in button
+            document.getElementById("load_chin").disabled = false;
+            document.getElementById("play").disabled = false; // enable play button
+            document.getElementById('audioFile').src = test_path + files_set_test[trial]; // Update the filename in audioFile object
+        }
+        else{
+            document.getElementById("load_chin").value = 'Chinese Loaded'; // update text in button
+            document.getElementById("load_chin").disabled = true; // disable load button
+            document.getElementById("load_eng").value = 'English'; // update text in button
+            document.getElementById("load_eng").disabled = false; // disable load button
+            document.getElementById("play").disabled = false; // enable play button
+            document.getElementById('audioFile').src = test_path + files_set_test[trial]; // Update the filename in audioFile object
+        }
+        document.getElementById("nextTrial").disabled = true;
+    }
+
+    //initialize some variables for each trial
+    function load_inits(){
+        console.log(direc_path)
+        files_set_test = [];
+        files_set_key = [];
+        files_set_score = [];
+        test_index = Math.floor(Math.random()*numLists);
+        test_path = direc_path;
+    }
+
+    
+    // load test set files with keys 
+    function load_test_files(lang){
+        // console.log('load_test_files '+lang)
+//        var XMLHttpRequestObject = false;
+        var temp = direc_path + 'file_list.txt';
+        // console.log(temp)
+        
+//        var xhttp;
+//        if (window.XMLHttpRequest) {
+//        // code for modern browsers
+//        xhttp = new XMLHttpRequest();
+//        } else {
+//        // code for IE6, IE5
+//        xhttp = new ActiveXObject("Microsoft.XMLHTTP");
+//        }
+//        xhttp.onreadystatechange = function() {
+//        if (this.readyState == 4 && this.status == 200) {
+//            lang = this.responseText;
+//        //    console.log(spkr);  //(1) this works fine to display the contents of the file
+//        }
+//        };
+//        xhttp.open("GET", temp, false);
+//        xhttp.send();
+
+//        fetch(temp)
+//        .then( response => response.text() )
+//        .then( text => console.log(text) )
+        
+        // extract the two columns with space as separator
+        if(lang=='c')
+            var temp = chin_data.split("\n");
+        else
+            var temp = eng_data.split('\n');
+        ntrial = temp.length
+        console.log(temp[0])
+        temp.pop(); //removes last element "/n"                
+        var temp_0;
+        var temp_1 = [], temp_2 = [];
+        for(var i = 0;i<temp.length;i++){
+            temp_0 = temp[i];
+            indx_1 = temp_0.search("tChange_");
+            indx_2 = temp_0.search("_ms");
+            //temp_1 = temp_0.split(" ");
+            temp_1.push(temp_0);
+            temp_2.push(temp_0.slice(indx_1+8,indx_2));    
+        }
+        // shuffle the list (paired with the key) into two arrays
+        test_indices = shuffle_range(0,temp.length-1);
+        for(var i=0;i<temp.length;i++){
+            //files_set_ref.push(temp_1[0]);
+            files_set_test.push(temp_1[test_indices[i]]);
+            files_set_key.push(temp_2[test_indices[i]]);
+        }
+        files_set_score = files_set_key;
+    }
+    
+    
+    // create a shuffled list of numbers from nmin to nmax
+    function shuffle_range(nmin,nmax){
+        var indx = 0;
+        var shuff_str = [];
+        while (indx<(nmax-nmin+1)){
+            var x = Math.floor(Math.random() * (nmax-nmin+1))+nmin;
+            var flag = 0;
+            for(var j=0; j<shuff_str.length; j++){
+                if(x == shuff_str[j]){
+                flag = 1;
+                break;
+                }
+            }
+            if(flag == 0){	
+                shuff_str.push(x);
+                indx = indx+1;
+            }
+        }
+        //console.log(shuff_str)
+        return shuff_str
+    }
+    
+    // To play/pause sound:
+    function play_sound(idNumber) {
+        var idNumber = document.getElementById(idNumber);
+        var status = document.querySelectorAll("input[id=play]");
+        document.getElementById("load_eng").disabled = true;
+        document.getElementById("load_chin").disabled = true;
+        // document.getElementById("hitPressed").disabled = false;
+        
+        if (status[0].value == "Play") {
+        idNumber.pause(); // Pause all ids before playing next file.
+        status[0].value = "Playing";                
+        idNumber.play();
+        console.log("File: "+files_set_test[trial])
+
+        // interval = setInterval(runTimer, 10); // timer init
+        }
+  //       else {
+  //       idNumber.pause(); // Pause all ids before playing next file.
+  //       console.log('Pause changed to Play')
+  //       status[0].value = "Play";    
+		// // clearInterval(interval); // stop and store last value
+  //       }
+    }
+    
+    // To update filename in audioFile object after ompletion of current sound playback
+    function done_sound(idNumber) {
+        var idNumber = document.getElementById(idNumber);
+        var status = document.querySelectorAll("input[id=play]");
+
+        // trial = trial + 1;
+        status[0].value = "Play";
+        idNumber.pause(); // Pause all ids before playing next file.
+        idNumber.currentTime = 0; // Set the time back to zero
+        document.getElementById("play").disabled = true; // enable play button
+        // document.getElementById("nextTrial").disabled = false; // enable play button
+        document.getElementById("hitPressed1").disabled = false;
+        document.getElementById("hitPressed2").disabled = false;
+        // reset the clock display
+        interval = setInterval(runTimer, 10);
+        // clearInterval(interval);
+        // interval = null;
+        // timer = [0,0,0,0];
+        // timerRunning = false;
+
+        // theTimer.innerHTML = '00:00:00';   
+    }
+
+    // To init next trial
+    function next_trial(idNumber) {
+        var idNumber = document.getElementById(idNumber);
+        var status = document.querySelectorAll("input[id=play]");
+
+        if (trial==(ntrial-1)){
+            status[0].value = "Play";
+            idNumber.pause(); // Pause all ids before playing next file.
+            idNumber.currentTime = 0; // Set the time back to zero
+            document.getElementById("play").disabled = true; // enable play button
+            document.getElementById("nextTrial").disabled = true; // enable play button
+            document.getElementById("nextTrial").value = "Trials Done"; // enable play button
+            // reset the clock display
+            clearInterval(interval);
+            interval = null;
+            timer = [0,0,0,0];
+            timerRunning = false;
+
+            theTimer.innerHTML = '00:00:00';
+//            document.getElementById("saveData").value = 'Save'; // update text in button 
+//            document.getElementById("saveData").disabled = false; // disable load button 
+            document.getElementById("subject").disabled = false; // update  
+            document.getElementById("subject").placeholder="Enter name"; // update 
+        }
+        else{
+            status[0].value = "Play";
+            idNumber.pause(); // Pause all ids before playing next file.
+            idNumber.currentTime = 0; // Set the time back to zero
+            document.getElementById("hitPressed1").disable = true;
+            document.getElementById("hitPressed2").disable = true;
+            document.getElementById("play").disabled = false; // enable play button
+            document.getElementById("nextTrial").disabled = true; // enable play button
+            document.getElementById('audioFile').src = direc_path + files_set_test[trial]; // Update the filename in audioFile object
+        }
+    }
+        
+</script> 
+    
+</html>

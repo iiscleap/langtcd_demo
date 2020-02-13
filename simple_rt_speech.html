@@ -1,0 +1,351 @@
+<!DOCTYPE html> 
+<html> 
+<head>
+    <meta charset="utf-8">
+    <title>Listen for Change</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Favicon -->
+    <link href="./img/favicon.ico" rel="icon">
+  
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,500,700|Roboto:400,900" rel="stylesheet">
+    
+    <!-- Bootstrap CSS File -->
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+  
+    <!--
+     Libraries CSS Files 
+    <link href="Bell/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    -->
+    
+    <!--     Main Stylesheet File -->
+    <link href="./css/style.css" rel="stylesheet">
+    
+    <!--     Button Shake Stylesheet File -->
+    <link href="./css/csshake.min.css" rel="stylesheet">    
+</head>
+
+<body>
+<div id='experimentDiv' style="display: block;">
+    <div>
+<!--        dummy for vertical padding-->
+        <p></p>
+    </div>
+<div class="container text-center">   
+<div class="card card-block text-center">    
+    <h3><font color="#199EB8">Instants of Speaker Change</font></h3>
+    Step 1: Press "Load".
+    <font size="2" color="gray">This creates the playlist for the test.</font><br>
+    Step 2: Press "Play".
+    <font size="2" color="gray">This will play the sound.</font><br>
+    Step 3: Hit key "M" to respond to change in speaker.
+    <font size="2" color="gray">Your response time is recorded. So be attentive.</font><br>
+    Step 4: Use "Pause/Play" to pause/play the sound.
+    <font size="2" color="gray">You can relax when needed.</font><br>
+    Step 5: Press "Next" and goto Step 2.
+    <font size="2" color="gray">Your response time is recorded. Be attentive while responding.</font><br>
+    Step 6: Enter your "Name" and press "Send".<br>
+    <font size="2" color="gray">We will analyze your responses.</font>
+    <br>
+    </div>
+    </div>
+    
+<div class="container text-center">    
+<div class="meta">
+<a href="javascript:load_files();"><input type="button" id="load" value="Load" class="btn btn-full"></a><br />
+</div>
+</div>
+
+    <div>
+        <p></p>
+    </div>
+    
+<div class="container text-center">    
+<div class="divPlay">
+<audio id="audioFile" src="" preload="auto" onended="done_sound('audioFile');"></audio>
+<a href="javascript:play_sound('audioFile');"><input type="button" id="play" value="Play" disabled="true" class="btn btn-full"></a><br />
+</div>
+    </div>
+
+    
+<div class="container text-center">    
+<div class="timer">00:00:00</div>
+    </div>
+    
+    
+<div class="container text-center">        
+<div class="meta">
+<a href="javascript:next_trial('audioFile');"><input type="button" id="nextTrial" value="Next" disabled class="btn btn-full"></a><br />
+</div>
+    </div>
+    
+<div class="container text-center">    
+<br>
+<form>
+<input type="text" name="name_id" id="subject" placeholder="" value="" disabled>
+</form>
+</div>
+
+<div class="container text-center">    
+<br>
+<!--
+<form>
+<input type = "button" id="saveData" value = "" 
+onclick = "writeData('fileWriteAudio.php','targetDiv1')" disabled class="btn btn-full">
+</form>
+-->
+</div>
+
+    <div class="shake-chunk">Hello</div>
+        <div id = "targetDiv1">
+    <p><br><br>  </p>
+    </div>
+
+</div>
+</body>
+
+<script src = "./data/rtSamples/file_list.txt"></script>
+    
+<script type="text/javascript">   
+    const ntrial = 10, numLists = 1;
+    var itrial = 0;
+
+    const theTimer = document.querySelector(".timer");
+    var timer = [0,0,0,0]
+    var interval = 0;
+    var timerRunning = false;    
+    
+    var trial = 0, length = 0;
+    var files_set = [];    
+    var value = 1234;
+//    var sTime = '';
+    
+//    var direc_path = './media/audio/rtsamples/';
+    var direc_path = './data/rtSamples/';
+    var files_set_test, files_set_key, files_set_score;
+    
+    // Add leading zero to numbers 9 or below (purely for aesthetics):
+    function leadingZero(time) {
+        if (time <= 9) {
+            time = "0" + time;
+        }
+        return time;
+    }
+    
+    // To run stop watch timer:
+    function runTimer() {
+        //let currentTime = leadingZero(timer[0]) + ":" + leadingZero(timer[1]) + ":" + leadingZero(timer[2]);
+        //theTimer.innerHTML = currentTime;
+
+        let currentTime = timer[3]*10;
+        console.log(timer[3]*10);
+        
+        theTimer.innerHTML = timer[3]*10;
+        timer[3]++;
+
+        timer[0] = Math.floor((timer[3]/100)/60);
+        timer[1] = Math.floor((timer[3]/100) - (timer[0] * 60));
+        timer[2] = Math.floor(timer[3] - (timer[1] * 100) - (timer[0] * 6000));
+    }
+    
+    // to read keystroke
+    document.addEventListener("keydown", keyDownTextField, false);
+    function keyDownTextField(e) {
+        var keyCode = e.keyCode;
+        if(keyCode==77) {
+            console.log("M stroke");
+            sTime  = theTimer.innerHTML; 
+            console.log(sTime);  
+            rt_time = sTime - parseInt(files_set_key[trial]);
+            console.log(rt_time);
+            if (rt_time>200) {
+            temp_str = "Your reaction time is "+rt_time+ " msec";
+                alert(temp_str);
+            }
+            else {
+                alert("You pressed M too fast!");
+            }
+        }
+        else {
+            alert("Oh no you didn't press M");
+        }
+    }
+    
+    // function to load filenames from list in server
+    function load_files(){
+        
+        load_inits();
+        load_test_files();
+
+        console.log(files_set_test);
+        console.log(files_set_key);
+
+        //document.getElementById("select1").href = 'javascript:select_choice('+ref_index+');'; // update text in button
+        document.getElementById("load").value = 'Loaded'; // update text in button
+        document.getElementById("load").disabled = true; // disable load button
+        document.getElementById("play").disabled = false; // enable play button
+        document.getElementById('audioFile').src = test_path + files_set_test[trial]; // Update the filename in audioFile object
+    }
+
+    //initialize some variables for each trial
+    function load_inits(){
+        files_set_test = [];
+        files_set_key = [];
+        files_set_score = [];
+        test_index = Math.floor(Math.random()*numLists);
+        test_path = direc_path;
+    }
+
+    
+    // load test set files with keys 
+    function load_test_files(){
+//        var XMLHttpRequestObject = false;
+        var temp = direc_path + 'file_list.txt';
+        console.log(temp)
+        
+//        var xhttp;
+//        if (window.XMLHttpRequest) {
+//        // code for modern browsers
+//        xhttp = new XMLHttpRequest();
+//        } else {
+//        // code for IE6, IE5
+//        xhttp = new ActiveXObject("Microsoft.XMLHTTP");
+//        }
+//        xhttp.onreadystatechange = function() {
+//        if (this.readyState == 4 && this.status == 200) {
+//            lang = this.responseText;
+//        //    console.log(spkr);  //(1) this works fine to display the contents of the file
+//        }
+//        };
+//        xhttp.open("GET", temp, false);
+//        xhttp.send();
+
+//        fetch(temp)
+//        .then( response => response.text() )
+//        .then( text => console.log(text) )
+        
+        // extract the two columns with space as separator
+        var temp = lang.split("\n");
+        console.log(temp[0])
+        temp.pop(); //removes last element "/n"                
+        var temp_0;
+        var temp_1 = [], temp_2 = [];
+        for(var i = 0;i<temp.length;i++){
+            temp_0 = temp[i];
+            indx_1 = temp_0.search("tChange_");
+            indx_2 = temp_0.search("_ms");
+            //temp_1 = temp_0.split(" ");
+            temp_1.push(temp_0);
+            temp_2.push(temp_0.slice(indx_1+8,indx_2));    
+        }
+        // shuffle the list (paired with the key) into two arrays
+        test_indices = shuffle_range(0,temp.length-1);
+        for(var i=0;i<temp.length;i++){
+            //files_set_ref.push(temp_1[0]);
+            files_set_test.push(temp_1[test_indices[i]]);
+            files_set_key.push(temp_2[test_indices[i]]);
+        }
+        files_set_score = files_set_key;
+    }
+    
+    
+    // create a shuffled list of numbers from nmin to nmax
+    function shuffle_range(nmin,nmax){
+        var indx = 0;
+        var shuff_str = [];
+        while (indx<(nmax-nmin+1)){
+            var x = Math.floor(Math.random() * (nmax-nmin+1))+nmin;
+            var flag = 0;
+            for(var j=0; j<shuff_str.length; j++){
+                if(x == shuff_str[j]){
+                flag = 1;
+                break;
+                }
+            }
+            if(flag == 0){	
+                shuff_str.push(x);
+                indx = indx+1;
+            }
+        }
+        //console.log(shuff_str)
+        return shuff_str
+    }
+    
+    // To play/pause sound:
+    function play_sound(idNumber) {
+        var idNumber = document.getElementById(idNumber);
+        var status = document.querySelectorAll("input[id=play]");
+
+        if (status[0].value == "Play") {
+        idNumber.pause(); // Pause all ids before playing next file.
+        status[0].value = "Pause";                
+        idNumber.play();
+        interval = setInterval(runTimer, 10); // timer init
+        }
+        else {
+        idNumber.pause(); // Pause all ids before playing next file.
+        console.log('Pause changed to Play')
+        status[0].value = "Play";    
+		clearInterval(interval); // stop and store last value
+        }
+    }
+    
+    // To update filename in audioFile object after ompletion of current sound playback
+    function done_sound(idNumber) {
+        var idNumber = document.getElementById(idNumber);
+        var status = document.querySelectorAll("input[id=play]");
+
+        trial = trial + 1;
+        status[0].value = "Play";
+        idNumber.pause(); // Pause all ids before playing next file.
+        idNumber.currentTime = 0; // Set the time back to zero
+        document.getElementById("play").disabled = true; // enable play button
+        document.getElementById("nextTrial").disabled = false; // enable play button
+        
+        // reset the clock display
+        clearInterval(interval);
+        interval = null;
+        timer = [0,0,0,0];
+        timerRunning = false;
+
+        theTimer.innerHTML = '00:00:00';   
+    }
+
+    // To init next trial
+    function next_trial(idNumber) {
+        var idNumber = document.getElementById(idNumber);
+        var status = document.querySelectorAll("input[id=play]");
+
+        if (trial==(ntrial-1)){
+            status[0].value = "Play";
+            idNumber.pause(); // Pause all ids before playing next file.
+            idNumber.currentTime = 0; // Set the time back to zero
+            document.getElementById("play").disabled = true; // enable play button
+            document.getElementById("nextTrial").disabled = true; // enable play button
+            document.getElementById("nextTrial").value = "Trials Done"; // enable play button
+            // reset the clock display
+            clearInterval(interval);
+            interval = null;
+            timer = [0,0,0,0];
+            timerRunning = false;
+
+            theTimer.innerHTML = '00:00:00';
+//            document.getElementById("saveData").value = 'Save'; // update text in button 
+//            document.getElementById("saveData").disabled = false; // disable load button 
+            document.getElementById("subject").disabled = false; // update  
+            document.getElementById("subject").placeholder="Enter name"; // update 
+        }
+        else{
+            status[0].value = "Play";
+            idNumber.pause(); // Pause all ids before playing next file.
+            idNumber.currentTime = 0; // Set the time back to zero
+            document.getElementById("play").disabled = false; // enable play button
+            document.getElementById("nextTrial").disabled = true; // enable play button
+            document.getElementById('audioFile').src = direc_path + files_set_test[trial]; // Update the filename in audioFile object
+        }
+    }
+        
+</script> 
+    
+</html>
