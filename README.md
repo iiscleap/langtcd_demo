@@ -3,7 +3,7 @@ TCD stands for talker change detection. This repository shares a html script to 
 
 # Test it
 1. You can open it straightaway by pasting the below URL in your browser.
-Link: ???
+Link: http://htmlpreview.github.io/?https://github.com/iiscleap/langtcd_demo/blob/master/rt_speech.html
 
 2. Or, you can download this repository and open rt_speech.html in your local system's web browser.
  
